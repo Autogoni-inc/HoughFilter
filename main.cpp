@@ -1,7 +1,9 @@
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 using namespace std;
 
@@ -9,7 +11,8 @@ using namespace std;
 
 void printM(int ***data, int h, int w, int r);
 void initialize(int ***array, int height, int width, int range);
-
+void voting(int ***array, int height, int width, int range, int **image);
+void threshold(int ***array, int height, int width, int range);
 
 int main(int argc, char** argv) 
 {
@@ -91,4 +94,35 @@ void printM(int ***data, int h, int w, int r)
 		}
 		printf("\n");
 	}
+}
+
+void voting(int ***array, int height, int width, int range, int **image)
+{
+	int a, b;
+	int maxDegree = 360;
+	float PI = 3.1415926535897;
+
+	for (int y = 0; y < height; y++) //go through every row
+	{
+		for (int x = 0; x < width; x++) //go through every column
+		{
+			if (image[x][y] == 1)
+			{
+				for (int radius = 0; radius < range; radius++) //go through every radius
+				{
+					for (int d = 0; d < maxDegree; d++)
+					{
+						a = x - radius * cos(d * PI / 180);
+						b = y - radius * sin(d *PI / 180);
+						array[a][b][radius]++;
+					}
+				}
+			}
+		}
+	}
+}
+
+void threshold(int ***array, int height, int width, int range)
+{
+
 }
