@@ -14,7 +14,7 @@ void initialize(int ***array, int height, int width, int range);
 void voting(int ***array, int height, int width, int range, int image[6][7]);
 void threshold(int ***array, int height, int width, int range, int th);
 void th_range(int start, int end, int ***array, int height, int width, int range);
-
+//void readImage(char* filename, int height, int width, int **image);
 
 int main(int argc, char** argv) 
 {
@@ -26,6 +26,7 @@ int main(int argc, char** argv)
 	int HEIGHT = 6;// atoi(argv[2]);
 	int WIDTH = 7;// atoi(argv[3]);
 	int RANGE = 3;
+
 	int image[HEIGHT][7] = {{0, 0, 0, 0, 0, 0, 0},
 	    		   			{0, 0, 1, 1, 1, 0, 0},
 	               			{0, 0, 1, 0, 1, 0, 0},  // 2, 3 is circle coordinate
@@ -34,6 +35,9 @@ int main(int argc, char** argv)
 				   			{0, 0, 0, 0, 0, 0, 0}};
 
 	printf("Hello world\n");
+	
+	//int image[4][4] = {{0, 0, 0, 0},{0, 0, 1, 0},{0, 1, 0, 1},{0, 0, 1, 0}};
+	char filename[] = "test.txt"; //argv[4];
 
 	int ***data;
 
@@ -47,9 +51,20 @@ int main(int argc, char** argv)
 			data[i][j] = new int[RANGE];
 		}
 	}
-		
+
+	int **image2;
+	image2 = new int*[HEIGHT];  // layer 1
+	for (int i = 0; i < HEIGHT; ++i) 
+	{  // layer 2
+		image2[i] = new int[WIDTH];
+	}
+
 	initialize(data, HEIGHT, WIDTH, RANGE);
+
+	//readImage(filename, HEIGHT, WIDTH, image2);
+
 	voting(data, HEIGHT, WIDTH, RANGE, image);
+
 	printM(data, HEIGHT, WIDTH, RANGE);
 	printf("DONE PRINTING\n");
 	th_range(4,6,data, HEIGHT, WIDTH, RANGE);
@@ -73,8 +88,6 @@ int main(int argc, char** argv)
 
 void initialize(int ***array, int height, int width, int range)
 {
-	cout << "beginning of init" << endl;
-
 	for (int i = 0; i < height; i++) //go through every row
 	{
 		for (int j = 0; j < width; j++) //go through every column
@@ -85,8 +98,6 @@ void initialize(int ***array, int height, int width, int range)
 			}
 		}
 	}
-
-	cout << "end of init" << endl;
 }
 
 void printM(int ***data, int h, int w, int r) 
@@ -174,17 +185,16 @@ void voting(int ***array, int height, int width, int range, int image[6][7])
 void threshold(int ***array, int height, int width, int range, int th)
 {
 	ofstream myfile;
-	//std::string name;
 	char str[80];
 	char buffer[200];
 	sprintf(buffer, "%d", th);	
   	strcpy (str,"th_");
   	strcat (str, buffer);
   	strcat (str,".csv");
-	//name = "th_" + th + ".csv";
-	//const char *cstrname = name.c_str();
     myfile.open (str);
     int actual_radius = 0;
+    
+    myfile.open ("circles.csv");
     
 	for(int i = 0; i < height; i++) 
 	{
@@ -196,7 +206,9 @@ void threshold(int ***array, int height, int width, int range, int th)
 				if(array[i][j][k] >= th)
 				{
 					actual_radius = k + 1; // because starts at 0
-					myfile << i << "," << j << "," << actual_radius << "\n";
+					myfile << i << "," << j << "," << actual_radius << "\n" << std::flush;
+					//myfile <<  "fuck";
+					cout << str << "|" << i << "|" << j << "|" << actual_radius << "\n";
 				}
 			}
 		}
@@ -211,3 +223,17 @@ void th_range(int start, int end, int ***array, int height, int width, int range
 		threshold(array, height, width, range, i);
 	}
 }
+
+//void readImage(char* filename, int height, int width, int **image)
+//{
+//	ifstream myfile;
+//	cout << "Reading image" << endl;
+//	myfile.open(filename);
+//	for (int i = 0; i < height; i++)
+//	{
+//		for (int j = 0; j < width; j++)
+//		{
+//			myfile >> image[i][j];
+//		}
+//	}
+//}
