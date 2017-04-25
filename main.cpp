@@ -224,6 +224,7 @@ void th_range(int start, int end, int ***array, int height, int width, int range
 	{
 		threshold(array, height, width, range, i);
 	}
+	myfile.close();
 }
 
 void readImage(char* filename, int height, int width, int **image)
