@@ -173,4 +173,5 @@ void readImage(char* filename, int height, int width, int **image)
 			myfile >> image[i][j];
 		}
 	}
+	myfile.close();
 }
