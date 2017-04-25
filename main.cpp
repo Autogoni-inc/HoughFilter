@@ -13,6 +13,7 @@ void printM(int ***data, int h, int w, int r);
 void initialize(int ***array, int height, int width, int range);
 void voting(int ***array, int height, int width, int range, int **image);
 void threshold(int ***array, int height, int width, int range, int th);
+void readImage(char* filename, int height, int width, int **image);
 
 int main(int argc, char** argv) 
 {
@@ -24,12 +25,9 @@ int main(int argc, char** argv)
 	int HEIGHT = 2;// atoi(argv[2]);
 	int WIDTH = 2;// atoi(argv[3]);
 	int RANGE = 3;
-	int image[4][4] = {{0, 0, 0, 0},
-		    {0, 0, 1, 0},
-		    {0, 1, 0, 1},
-		    {0, 0, 1, 0}};
-
-	printf("Hello world\n");
+	int **image;
+	//int image[4][4] = {{0, 0, 0, 0},{0, 0, 1, 0},{0, 1, 0, 1},{0, 0, 1, 0}};
+	char filename[] = "test.txt"; //argv[4];
 
 	int ***data;
 
@@ -43,8 +41,18 @@ int main(int argc, char** argv)
 			data[i][j] = new int[RANGE];
 		}
 	}
-		
+
+	image = new int*[HEIGHT];  // layer 1
+	for (int i = 0; i < HEIGHT; ++i) 
+	{  // layer 2
+		image[i] = new int[WIDTH];
+	}
+
 	initialize(data, HEIGHT, WIDTH, RANGE);
+
+	readImage(filename, HEIGHT, WIDTH, image);
+
+	//voting(data, HEIGHT, WIDTH, RANGE, image);
 
 	printM(data, HEIGHT, WIDTH, RANGE);
 	printf("DONE PRINTING\n");
@@ -134,7 +142,7 @@ void voting(int ***array, int height, int width, int range, int **image)
 void threshold(int ***array, int height, int width, int range, int th)
 {
 	ofstream myfile;
-    myfile.open ("circles.csv");
+    	myfile.open ("circles.csv");
     
 	for(int i = 0; i < height; i++) 
 	{
@@ -151,4 +159,18 @@ void threshold(int ***array, int height, int width, int range, int th)
 		}
 	}
 	myfile.close();
+}
+
+void readImage(char* filename, int height, int width, int **image)
+{
+	ifstream myfile;
+	cout << "Reading image" << endl;
+	myfile.open(filename);
+	for (int i = 0; i < height; i++)
+	{
+		for (int j = 0; j < width; j++)
+		{
+			myfile >> image[i][j];
+		}
+	}
 }
