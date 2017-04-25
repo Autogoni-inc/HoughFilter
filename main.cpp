@@ -24,6 +24,10 @@ int main(int argc, char** argv)
 	int HEIGHT = atoi(argv[2]);
 	int WIDTH = atoi(argv[3]);
 	int RANGE = 3;
+	int image[4][4] = {{0, 0, 0, 0},
+		    {0, 0, 1, 0},
+		    {0, 1, 0, 1},
+		    {0, 0, 1, 0}};
 
 	printf("Hello world\n");
 
@@ -40,6 +44,7 @@ int main(int argc, char** argv)
 		}
 	}	
 	initialize(data, HEIGHT, WIDTH, RANGE);
+	voting(data, HEIGHT, WIDTH, RANGE, image);
 
 	printM(data, HEIGHT, WIDTH, RANGE);
 	printf("DONE PRINTING\n");
