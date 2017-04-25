@@ -24,6 +24,10 @@ int main(int argc, char** argv)
 	int HEIGHT = 2;// atoi(argv[2]);
 	int WIDTH = 2;// atoi(argv[3]);
 	int RANGE = 3;
+	int image[4][4] = {{0, 0, 0, 0},
+		    {0, 0, 1, 0},
+		    {0, 1, 0, 1},
+		    {0, 0, 1, 0}};
 
 	printf("Hello world\n");
 
@@ -41,6 +45,7 @@ int main(int argc, char** argv)
 	}
 		
 	initialize(data, HEIGHT, WIDTH, RANGE);
+
 	printM(data, HEIGHT, WIDTH, RANGE);
 	printf("DONE PRINTING\n");
 	threshold(data, HEIGHT, WIDTH, RANGE, 0);
