@@ -12,7 +12,7 @@ using namespace std;
 void printM(int ***data, int h, int w, int r);
 void initialize(int ***array, int height, int width, int range);
 void voting(int ***array, int height, int width, int range, int **image);
-void threshold(int ***array, int height, int width, int range);
+void threshold(int ***array, int height, int width, int range, int th);
 
 int main(int argc, char** argv) 
 {
@@ -21,8 +21,8 @@ int main(int argc, char** argv)
 	{
 		printf("Error: please enter 3 command line arguments %i\n", argc);
 	}
-	int HEIGHT = atoi(argv[2]);
-	int WIDTH = atoi(argv[3]);
+	int HEIGHT = 2;// atoi(argv[2]);
+	int WIDTH = 2;// atoi(argv[3]);
 	int RANGE = 3;
 
 	printf("Hello world\n");
@@ -38,13 +38,13 @@ int main(int argc, char** argv)
 		{
 			data[i][j] = new int[RANGE];
 		}
-	}	
+	}
+		
 	initialize(data, HEIGHT, WIDTH, RANGE);
-
 	printM(data, HEIGHT, WIDTH, RANGE);
 	printf("DONE PRINTING\n");
+	threshold(data, HEIGHT, WIDTH, RANGE, 0);
 
-	printM(data, HEIGHT, WIDTH, RANGE);
 
 	// De-Allocate memory to prevent memory leak
 	for (int i = 0; i < HEIGHT; ++i) 
@@ -110,6 +110,10 @@ void voting(int ***array, int height, int width, int range, int **image)
 			{
 				for (int radius = 0; radius < range; radius++) //go through every radius
 				{
+					// NOTE RADIUS MUST BE OFFSET IN CALCULATIONS
+					// NOTE INDEX CANT BE OUT OF BOUNDS
+					// NOTE RADIUS CANT BE 0
+					// NOTE CANT VOTE TWICE FOR SAME PIXEL
 					for (int d = 0; d < maxDegree; d++)
 					{
 						a = x - radius * cos(d * PI / 180);
@@ -122,7 +126,24 @@ void voting(int ***array, int height, int width, int range, int **image)
 	}
 }
 
-void threshold(int ***array, int height, int width, int range)
+void threshold(int ***array, int height, int width, int range, int th)
 {
-
+	ofstream myfile;
+    myfile.open ("circles.csv");
+    
+	for(int i = 0; i < height; i++) 
+	{
+		for(int j = 0; j < width; j++) 
+		{
+			for(int k = 0; k < range; k++) 
+			{
+				// TO DO : GET RID OF LAST LINE
+				if(array[i][j][k] >= th)
+				{
+					myfile << i << "," << j << "," << k << "\n";
+				}
+			}
+		}
+	}
+	myfile.close();
 }
