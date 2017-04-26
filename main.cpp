@@ -5,6 +5,17 @@
 #include <string.h>
 #include <math.h>
 
+// Ben Hammel, Emmali Hanson, Kevin Wright, Gleb Sklyr
+
+/* 
+	last modified: 04/25/2017 (MM/DD/YYYY) at 22:52 CST
+    description: an implementation of the Hough ("huff") transform to 
+    find circles in a binary image that was already processed to
+    contain edges.  the program writes the coordinates and radius
+    of the detected circle into a csv file based on a specified 
+    threshold.  for each threshold applied, a new file is created.
+*/
+
 using namespace std;
 
 /* run this program using the console pauser or add your own getch, system("pause") or input loop */
@@ -26,8 +37,9 @@ int main(int argc, char** argv)
 	}
 	int HEIGHT = 12;// atoi(argv[2]);
 	int WIDTH = 13;// atoi(argv[3]);
-	int RANGE = 3;
+	int RANGE = 5;
 
+	// Test image
 	int image[12][13] = {   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	    		   			{0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0},
 	               			{0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0},
@@ -41,12 +53,10 @@ int main(int argc, char** argv)
 				   			{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 				   			{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
 
-	printf("Hello world\n");
-
 	char filename[] = "test.txt"; //argv[4];
-
+	
+	// voting array
 	int ***data;
-
 	// Allocate memory
 	data = new int**[HEIGHT];  // layer 1
 	for (int i = 0; i < HEIGHT; ++i) 
@@ -58,22 +68,20 @@ int main(int argc, char** argv)
 		}
 	}
 
-	int **image2;
-	image2 = new int*[HEIGHT];  // layer 1
-	for (int i = 0; i < HEIGHT; ++i) 
-	{  // layer 2
-		image2[i] = new int[WIDTH];
-	}
+	// MUST ADD MEMORY DEALLOCATION BEFORE UNCOMMENTING THIS
+//	int **image2;
+//	image2 = new int*[HEIGHT];  // layer 1
+//	for (int i = 0; i < HEIGHT; ++i) 
+//	{  // layer 2
+//		image2[i] = new int[WIDTH];
+//	}
 
-	initialize(data, HEIGHT, WIDTH, RANGE);
-
-	readImage(filename, HEIGHT, WIDTH, image2);
-
-	voting2(data, HEIGHT, WIDTH, RANGE, image);  
-
-	printM(data, HEIGHT, WIDTH, RANGE);
-	printf("DONE PRINTING\n");
-	th_range(4,9,data, HEIGHT, WIDTH, RANGE);
+	// Hough
+	initialize(data, HEIGHT, WIDTH, RANGE); // zero voting array
+	// readImage(filename, HEIGHT, WIDTH, image2); // read image from file
+	voting2(data, HEIGHT, WIDTH, RANGE, image); // vote
+	// printM(data, HEIGHT, WIDTH, RANGE); // optional debug printout
+	th_range(1, 9, data, HEIGHT, WIDTH, RANGE); // filter out the high scoring circles into files
 
 
 	// De-Allocate memory to prevent memory leak
@@ -86,12 +94,11 @@ int main(int argc, char** argv)
 		delete [] data[i];
 	}
 	delete [] data;
-	printf("DEALLOCATED\n");
 
 	return 0;
 }
 
-
+// zero out a 3D array
 void initialize(int ***array, int height, int width, int range)
 {
 	for (int i = 0; i < height; i++) //go through every row
@@ -106,6 +113,7 @@ void initialize(int ***array, int height, int width, int range)
 	}
 }
 
+// print 3D array to console for visualization
 void printM(int ***data, int h, int w, int r) 
 {
 	for(int i = 0; i < h; i++) 
@@ -122,6 +130,7 @@ void printM(int ***data, int h, int w, int r)
 	}
 }
 
+// Hough voting implementation
 void voting2(int ***array, int height, int width, int range, int image[12][13])
 {
 	int a, b;
@@ -139,36 +148,29 @@ void voting2(int ***array, int height, int width, int range, int image[12][13])
 			lookup[i][j] = new int[range];
 		}
 	}
-	
-	//printf("Done initializing params");
 
 	for (int y = 0; y < height; y++) //go through every row
 	{
-		//printf("Int loop1");
 		for (int x = 0; x < width; x++) //go through every column
 		{
-			//printf("Int loop2");
 			if (image[x][y] == 1) // if it is a possible circle edge
 			{
-				//printf("found 1 pixel");
 				for (int radius = 0; radius < range; radius++) //go through every radius
 				{
-					//printf("in loop3");
-					initialize(lookup, height, width, range);
+					initialize(lookup, height, width, range); // each time zero out the lookup table
 					for (int d = 0; d < maxDegree; d++)
 					{	
-						//printf("in loop 4");
+						// possible circle center coordinates
 						a = x - (radius + MINRAD) * cos(d * PI / 180);
 						b = y - (radius + MINRAD) * sin(d *PI / 180);
-						//printf("\nsin and COS works!\n");
-						
+
+						// do not vote if the circle is out of bounds
+						if((a + (radius+1)) >= width || (a - (radius+1)) < 0 || (b + (radius+1)) >= height || (b - (radius+1)) < 0) { continue; }
 						if(a < height && a > 0 && b < width && b > 0) // point noot out of bounds
 						{
-							if(lookup[a][b][radius] != 0) { /*printf("\nduplicate vote\n")*/;continue; } // do not vote twice per rafius
-							//printf("\nvote start\n");
-							array[a][b][radius]++;
-							lookup[a][b][radius]++;
-							//printf("\nvote end\n");
+							if(lookup[a][b][radius] != 0) { continue; } // do not vote twice per rafius
+							array[a][b][radius]++; // vote!
+							lookup[a][b][radius]++; // mark as already voted for this radius
 						}
 						//printf("\ngot to end of loop 4\n");
 					}
@@ -188,6 +190,7 @@ void voting2(int ***array, int height, int width, int range, int image[12][13])
 	delete [] lookup;
 }
 
+// use a threshold to print legible circles from voting array to a csv file
 void threshold(int ***array, int height, int width, int range, int th)
 {
 	ofstream myfile;
@@ -218,15 +221,16 @@ void threshold(int ***array, int height, int width, int range, int th)
 	myfile.close();
 }
 
+// use the threshold() function for a range of values
 void th_range(int start, int end, int ***array, int height, int width, int range)
 {
 	for(int i = start; i <= end; i++) 
 	{
 		threshold(array, height, width, range, i);
 	}
-	myfile.close();
 }
 
+// read an image into an array
 void readImage(char* filename, int height, int width, int **image)
 {
 	ifstream myfile;
@@ -257,7 +261,10 @@ void readImage(char* filename, int height, int width, int **image)
 
 
 
+/* CONSTRUCTION ZONE KEEP OUT */
 
+
+// copy of voting method
 void voting(int ***array, int width, int height, int range, int **image)
 {
 	int a, b;
