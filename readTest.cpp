@@ -5,21 +5,24 @@ using namespace std;
 
 void readImage(char *, int, int);
 
+#define WIDTH 256
+#define HEIGHT 256
+
 float *data;
-float array[256][256];
+float array[WIDTH][HEIGHT];
 
 int main()
 {
 
 	cout << "Hello World!";
 
-	data = new float[256*256];	
-	readImage("lab5_spatial_image.bin", 256, 256);
+	data = new float[WIDTH*HEIGHT];	
+	readImage("lab5_spatial_image.bin", WIDTH, HEIGHT);
 
 	int count = 0;
-	for(int i = 0; i < 256; i++)
+	for(int i = 0; i < HEIGHT; i++)
 	{
-		for(int j = 0; j < 256; j++)
+		for(int j = 0; j < WIDTH; j++)
 		{
 			array[i][j] = data[count];
 			count++;
