@@ -28,7 +28,7 @@ void threshold(int ***array, int height, int width, int minRad, int range, int t
 void th_range(int start, int end, int ***array, int height, int width, int minRad, int range);
 void readImage(char* filename, int height, int width, int **image);
 void readImage2(int *, char *, int, int);
-
+void bestCircle(int ***array, int height, int width, int minRad, int range);
 
 
 int main(int argc, char** argv) 
@@ -53,13 +53,6 @@ int main(int argc, char** argv)
 	int minRad = atoi(argv[4]);
 	int maxRad = atoi(argv[5]);
 	int RANGE = maxRad - minRad;
-
-	cout << filename << "\r\n";
-	cout << H << "\r\n";
-	cout << W << "\r\n";
-	cout << minRad << "\r\n";
-	cout << maxRad << "\r\n";
-	cout << RANGE << "\r\n";
 
 	// Test image
 	int image[12][13] = {   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -125,7 +118,8 @@ int main(int argc, char** argv)
 
 	// printM(data, HEIGHT, WIDTH, RANGE); // optional debug printout
 //	th_range(1, 9, data, HEIGHT, WIDTH, RANGE); // filter out the high scoring circles into files
-	th_range(1, 1000, data, H, W, minRad, RANGE);
+	//th_range(1, 1000, data, H, W, minRad, RANGE);
+	bestCircle(data, H, W, minRad, RANGE);
 
 	// De-Allocate memory to prevent memory leak
 	for (int i = 0; i < H; ++i) 
@@ -238,6 +232,42 @@ void voting2(int ***array, int height, int width, int range, int image[12][13])
 		delete [] lookup[i];
 	}
 	delete [] lookup;
+}
+
+void bestCircle(int ***array, int height, int width, int minRad, int range)
+{
+	ofstream myfile;
+	char str[80];
+	strcpy(str, "out.csv");
+	myfile.open(str);
+	int actual_radius = 0;
+	int bestH = 0;
+	int bestW = 0;
+	int bestRange = 0;
+	int bestScore = 0;
+
+	for(int i = 0; i < height; i++)
+	{
+		for(int j = 0; j < width; j++)
+		{
+			for(int k = 0; k < range; k++)
+			{
+				if(array[i][j][k] >= bestScore)
+				{
+					bestH = i;
+					bestW = j;
+					bestRange = k;
+					bestScore = array[i][j][k];
+				}				
+			}	
+		}
+	}
+	
+	actual_radius = bestRange + minRad;
+	myfile << bestH << "," << bestW << "," << actual_radius << std::flush;
+
+	myfile.close();
+
 }
 
 // use a threshold to print legible circles from voting array to a csv file
