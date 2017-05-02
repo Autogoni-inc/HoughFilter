@@ -23,9 +23,9 @@ using namespace std;
 void printM(int ***data, int h, int w, int r);
 void initialize(int ***array, int height, int width, int range);
 void voting2(int ***array, int height, int width, int range, int image[12][13]);
-void voting(int ***array, int height, int width, int range, int **image);
-void threshold(int ***array, int height, int width, int range, int th);
-void th_range(int start, int end, int ***array, int height, int width, int range);
+void voting(int ***array, int height, int width, int minRad, int range, int **image);
+void threshold(int ***array, int height, int width, int minRad, int range, int th);
+void th_range(int start, int end, int ***array, int height, int width, int minRad, int range);
 void readImage(char* filename, int height, int width, int **image);
 void readImage2(int *, char *, int, int);
 
@@ -34,16 +34,32 @@ void readImage2(int *, char *, int, int);
 int main(int argc, char** argv) 
 {
 	//error checking command line args
-	if (argc != 4)
+	if (argc != 6)
 	{
-		printf("Error: please enter 3 command line arguments %i\n", argc);
+		printf("Error: please enter 5 command line arguments %i\n", argc);
+		exit(EXIT_FAILURE);
 	}
-	int HEIGHT = 12;// atoi(argv[2]);
-	int WIDTH = 13;// atoi(argv[3]);
-	int RANGE = 2;
+//	int HEIGHT = 12;// atoi(argv[2]);
+//	int WIDTH = 13;// atoi(argv[3]);
+//	int RANGE = 2;
+//	int minRad = 30;
 
-	int H = 90;
-	int W = 100;
+//	int H = 90;
+//	int W = 100;
+	
+	char* filename = argv[1];
+	int H = atoi(argv[2]);
+	int W = atoi(argv[3]);
+	int minRad = atoi(argv[4]);
+	int maxRad = atoi(argv[5]);
+	int RANGE = maxRad - minRad;
+
+	cout << filename << "\r\n";
+	cout << H << "\r\n";
+	cout << W << "\r\n";
+	cout << minRad << "\r\n";
+	cout << maxRad << "\r\n";
+	cout << RANGE << "\r\n";
 
 	// Test image
 	int image[12][13] = {   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -59,7 +75,7 @@ int main(int argc, char** argv)
 				   			{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 				   			{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
 
-	char filename[] = "test.txt"; //argv[4];
+//	char filename[] = "test.txt"; //argv[4];
 	
 	// voting array
 	int ***data;
@@ -77,7 +93,7 @@ int main(int argc, char** argv)
 	// MUST ADD MEMORY DEALLOCATION BEFORE UNCOMMENTING THIS
 
 	int *binData = new int[W*H];
-	readImage2(binData, "eye_test_image1.jpg.bin", W, H);
+	readImage2(binData, filename, W, H);
 
 	int **binImage;
 	binImage = new int*[H];  // layer 
@@ -105,11 +121,11 @@ int main(int argc, char** argv)
 	// readImage(filename, HEIGHT, WIDTH, image2); // read image from file
 
 	//voting2(data, HEIGHT, WIDTH, RANGE, image); // vote
-         voting(data, H, W, RANGE, binImage);
+         voting(data, H, W, minRad, RANGE, binImage);
 
 	// printM(data, HEIGHT, WIDTH, RANGE); // optional debug printout
 //	th_range(1, 9, data, HEIGHT, WIDTH, RANGE); // filter out the high scoring circles into files
-	th_range(100, 1000, data, H, W, RANGE);
+	th_range(1, 1000, data, H, W, minRad, RANGE);
 
 	// De-Allocate memory to prevent memory leak
 	for (int i = 0; i < H; ++i) 
@@ -194,7 +210,7 @@ void voting2(int ***array, int height, int width, int range, int image[12][13])
 					initialize(lookup, height, width, range); // each time zero out the lookup table
 					for (int d = 0; d < maxDegree; d++)
 					{	
-						// possible circle center coordinates
+						// possible circ/thle center coordinates
 						a = x - (radius + MINRAD) * cos(d * PI / 180);
 						b = y - (radius + MINRAD) * sin(d *PI / 180);
 
@@ -225,7 +241,7 @@ void voting2(int ***array, int height, int width, int range, int image[12][13])
 }
 
 // use a threshold to print legible circles from voting array to a csv file
-void threshold(int ***array, int height, int width, int range, int th)
+void threshold(int ***array, int height, int width, int minRad, int range, int th)
 {
 	ofstream myfile;
 	char str[80];
@@ -246,7 +262,7 @@ void threshold(int ***array, int height, int width, int range, int th)
 				// TO DO : GET RID OF LAST LINE
 				if(array[i][j][k] >= th)
 				{
-					actual_radius = k + 1; // because starts at 0
+					actual_radius = k + minRad; // because starts at 0
 					myfile << i << "," << j << "," << actual_radius << "\n" << std::flush;
 				}
 			}
@@ -256,11 +272,11 @@ void threshold(int ***array, int height, int width, int range, int th)
 }
 
 // use the threshold() function for a range of values
-void th_range(int start, int end, int ***array, int height, int width, int range)
+void th_range(int start, int end, int ***array, int height, int width, int minRad, int range)
 {
 	for(int i = start; i <= end; i++) 
 	{
-		threshold(array, height, width, range, i);
+		threshold(array, height, width, minRad, range, i);
 	}
 }
 
@@ -309,11 +325,11 @@ void readImage2(int *data, char * filename, int numRows, int numCols)
 
 
 // copy of voting method
-void voting(int ***array, int width, int height, int range, int **image)
+void voting(int ***array, int width, int height, int minRad, int range, int **image)
 {
 	int a, b;
 	int maxDegree = 360;
-	int MINRAD = 50;
+	int MINRAD = minRad;
 	float PI = 3.1415926535897;
 	// lookup table for duplicate votes
 	int ***lookup;
