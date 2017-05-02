@@ -8,15 +8,15 @@ void readImage(char *, int, int);
 #define WIDTH 256
 #define HEIGHT 256
 
-float *data;
-float array[WIDTH][HEIGHT];
+int *data;
+int array[WIDTH][HEIGHT];
 
 int main()
 {
 
 	cout << "Hello World!";
 
-	data = new float[WIDTH*HEIGHT];	
+	data = new int[WIDTH*HEIGHT];	
 	readImage("lab5_spatial_image.bin", WIDTH, HEIGHT);
 
 	int count = 0;
@@ -24,6 +24,10 @@ int main()
 	{
 		for(int j = 0; j < WIDTH; j++)
 		{
+			if(data[count] != 0)
+			{
+				data[count] = 1;
+			}
 			array[i][j] = data[count];
 			count++;
 			cout << array[i][j] << "\r\n";
